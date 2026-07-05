@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un Cours - NextLearn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px 0;
+            border: 2px dashed #ddd;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .image-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+        .drop-zone {
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .drop-zone:hover {
+            background-color: #e9ecef;
+        }
+        .drop-zone.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Créer un Nouveau Cours</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="courseForm" enctype="multipart/form-data">
+                            <!-- Informations de base -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Titre du cours *</label>
+                                        <input type="text" class="form-control" id="title" name="title" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="type" class="form-label">Type de cours *</label>
+                                        <select class="form-select" id="type" name="type" required>
+                                            <option value="">Sélectionner un type</option>
+                                            <option value="Exercise">Exercice</option>
+                                            <option value="Exam">Examen</option>
+                                            <option value="Admission">Admission</option>
+                                            <option value="Audition">Audition</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" 
+                                    placeholder="Décrivez votre cours en détail..."></textarea>
+                            </div>
+
+                            <!-- Image de couverture -->
+                            <div class="mb-3">
+                                <label class="form-label">Image de couverture</label>
+                                <div class="drop-zone" id="coverImageDropZone">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <p>Glissez-déposez une image ici ou cliquez pour sélectionner</p>
+                                    <input type="file" id="coverImage" name="image" accept="image/*" style="display: none;">
+                                </div>
+                                <div id="coverImagePreview" class="image-preview" style="display: none;">
+                                    <img id="coverImageImg" src="" alt="Aperçu">
+                                    <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeCoverImage()">
+                                        Supprimer
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Détails du cours -->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="level" class="form-label">Niveau</label>
+                                        <select class="form-select" id="level" name="level">
+                                            <option value="">Sélectionner un niveau</option>
+                                            <option value="Débutant">Débutant</option>
+                                            <option value="Intermédiaire">Intermédiaire</option>
+                                            <option value="Avancé">Avancé</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Prix (€)</label>
+                                        <input type="number" class="form-control" id="price" name="price" 
+                                            min="0" step="0.01" placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="time_limit" class="form-label">Durée (minutes)</label>
+                                        <input type="number" class="form-control" id="time_limit" name="time_limit" 
+                                            min="0" placeholder="120">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">Tags</label>
+                                <input type="text" class="form-control" id="tags" name="tags" 
+                                    placeholder="web,html,css,javascript (séparés par des virgules)">
+                            </div>
+
+                            <!-- Score de passage -->
+                            <div class="mb-3">
+                                <label for="passing_score" class="form-label">Score de passage (%)</label>
+                                <input type="number" class="form-control" id="passing_score" name="passing_score" 
+                                    min="0" max="100" placeholder="70">
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+                                    Sauvegarder comme brouillon
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Publier le cours
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Section Topics -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">Contenu du Cours</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="topicsContainer">
+                            <!-- Les topics seront ajoutés ici dynamiquement -->
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="addTopic()">
+                            + Ajouter un chapitre
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter un topic -->
+    <div class="modal fade" id="topicModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un Chapitre</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="topicForm">
+                        <div class="mb-3">
+                            <label for="topicTitle" class="form-label">Titre du chapitre *</label>
+                            <input type="text" class="form-control" id="topicTitle" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="contentType" class="form-label">Type de contenu</label>
+                            <select class="form-select" id="contentType">
+                                <option value="Text">Texte</option>
+                                <option value="Video">Vidéo</option>
+                                <option value="Quiz">Quiz</option>
+                                <option value="File">Fichier</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="topicContent" class="form-label">Contenu</label>
+                            <textarea class="form-control" id="topicContent" rows="6"></textarea>
+                            <small class="form-text text-muted">
+                                Vous pouvez utiliser du HTML pour formater votre contenu et inclure des images.
+                            </small>
+                        </div>
+
+                        <div class="mb-3" id="videoUrlSection" style="display: none;">
+                            <label for="videoUrl" class="form-label">URL de la vidéo</label>
+                            <input type="url" class="form-control" id="videoUrl" 
+                                placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+
+                        <!-- Upload d'images pour le contenu -->
+                        <div class="mb-3">
+                            <label class="form-label">Images pour le contenu</label>
+                            <div class="drop-zone" id="topicImageDropZone">
+                                <p>Glissez-déposez des images ici ou cliquez pour sélectionner</p>
+                                <input type="file" id="topicImages" multiple accept="image/*" style="display: none;">
+                            </div>
+                            <div id="topicImagesPreview" class="mt-2"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="topicOrder" class="form-label">Ordre</label>
+                                    <input type="number" class="form-control" id="topicOrder" min="0" value="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="isPreview">
+                                    <label class="form-check-label" for="isPreview">
+                                        Aperçu gratuit
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTopic()">Ajouter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let courseId = null;
+        let topics = [];
+
+        // Gestion du drag & drop pour l'image de couverture
+        const coverImageDropZone = document.getElementById('coverImageDropZone');
+        const coverImageInput = document.getElementById('coverImage');
+
+        coverImageDropZone.addEventListener('click', () => coverImageInput.click());
+        coverImageDropZone.addEventListener('dragover', handleDragOver);
+        coverImageDropZone.addEventListener('drop', handleCoverImageDrop);
+        coverImageInput.addEventListener('change', handleCoverImageSelect);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleCoverImageDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleCoverImageFile(files[0]);
+            }
+        }
+
+        function handleCoverImageSelect(e) {
+            if (e.target.files.length > 0) {
+                handleCoverImageFile(e.target.files[0]);
+            }
+        }
+
+        function handleCoverImageFile(file) {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('coverImageImg').src = e.target.result;
+                    document.getElementById('coverImagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeCoverImage() {
+            document.getElementById('coverImagePreview').style.display = 'none';
+            document.getElementById('coverImage').value = '';
+        }
+
+        // Gestion du formulaire principal
+        document.getElementById('courseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            createCourse('Published');
+        });
+
+        function saveDraft() {
+            createCourse('Draft');
+        }
+
+        async function createCourse(state) {
+            const formData = new FormData();
+            const form = document.getElementById('courseForm');
+            
+            // Ajouter tous les champs du formulaire
+            const fields = ['title', 'type', 'description', 'level', 'price', 'time_limit', 'tags', 'passing_score'];
+            fields.forEach(field => {
+                const value = form[field].value;
+                if (value) formData.append(field, value);
+            });
+            
+            formData.append('state', state);
+            
+            // Ajouter l'image si présente
+            const imageFile = document.getElementById('coverImage').files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            try {
+                const response = await fetch('/api/forms', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    courseId = result.id;
+                    alert('Cours créé avec succès !');
+                    
+                    // Créer les topics si il y en a
+                    if (topics.length > 0) {
+                        await createTopics();
+                    }
+                } else {
+                    alert('Erreur: ' + (result.message || 'Erreur inconnue'));
+                }
+            } catch (error) {
+                alert('Erreur de connexion: ' + error.message);
+            }
+        }
+
+        // Gestion des topics
+        function addTopic() {
+            const modal = new bootstrap.Modal(document.getElementById('topicModal'));
+            modal.show();
+        }
+
+        // Afficher/masquer le champ URL vidéo selon le type de contenu
+        document.getElementById('contentType').addEventListener('change', function() {
+            const videoSection = document.getElementById('videoUrlSection');
+            videoSection.style.display = this.value === 'Video' ? 'block' : 'none';
+        });
+
+        function saveTopic() {
+            const topic = {
+                title: document.getElementById('topicTitle').value,
+                content_type: document.getElementById('contentType').value,
+                content: document.getElementById('topicContent').value,
+                video_url: document.getElementById('videoUrl').value,
+                order: parseInt(document.getElementById('topicOrder').value),
+                is_preview: document.getElementById('isPreview').checked
+            };
+
+            if (!topic.title) {
+                alert('Le titre est requis');
+                return;
+            }
+
+            topics.push(topic);
+            displayTopics();
+            
+            // Fermer le modal et réinitialiser le formulaire
+            bootstrap.Modal.getInstance(document.getElementById('topicModal')).hide();
+            document.getElementById('topicForm').reset();
+        }
+
+        function displayTopics() {
+            const container = document.getElementById('topicsContainer');
+            container.innerHTML = '';
+
+            topics.forEach((topic, index) => {
+                const topicDiv = document.createElement('div');
+                topicDiv.className = 'card mb-2';
+                topicDiv.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${topic.title}</h6>
+                                <small class="text-muted">Type: ${topic.content_type} | Ordre: ${topic.order}</small>
+                                ${topic.is_preview ? '<span class="badge bg-info ms-2">Aperçu gratuit</span>' : ''}
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeTopic(${index})">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(topicDiv);
+            });
+        }
+
+        function removeTopic(index) {
+            topics.splice(index, 1);
+            displayTopics();
+        }
+
+        async function createTopics() {
+            for (const topic of topics) {
+                topic.form_id = courseId;
+                
+                try {
+                    const response = await fetch('/api/topics', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                        },
+                        body: JSON.stringify(topic)
+                    });
+
+                    if (!response.ok) {
+                        console.error('Erreur lors de la création du topic:', topic.title);
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
